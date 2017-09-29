@@ -7,6 +7,8 @@ use App\Ride;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Booking;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BookedRide;
 
 class RideController extends Controller
 {
@@ -60,6 +62,7 @@ class RideController extends Controller
             "date_time" => $date_time,
         ]);
 
+        alert()->success('You have added your ride', 'success');
         return back();
     }
 
@@ -69,11 +72,15 @@ class RideController extends Controller
             return back();
         }
 
-        Booking::create([
+        $booking = Booking::create([
             'user_id' => Auth::id(),
             'ride_id' => $id
         ]);
-        
+
+        Mail::to(Auth::user()->email)
+        ->send(new BookedRide($booking));
+
+        alert()->success('You have booked a ride', 'success');
         return back();
     }
 
